@@ -125,6 +125,9 @@ def init_config():
         "--ign_init_trans",
         type=str,
         default='')
+    parser.add_argument("-rt", "--randomize_throw_accuracy", 
+                        help="Randomizes bot's throw accuracy (default: true)",
+                        type=bool, default=True)
 
     config = parser.parse_args()
     if not config.username and 'username' not in load:
@@ -132,7 +135,7 @@ def init_config():
     if not config.password and 'password' not in load:
         config.password = getpass("Password: ")
 
-    # Passed in arguments shoud trump
+    # Passed in arguments should trump
     for key in config.__dict__:
         if key in load:
             config.__dict__[key] = load[key]

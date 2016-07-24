@@ -3,6 +3,7 @@
 import time
 import random
 from pokemongo_bot.human_behaviour import sleep
+from pokemongo_bot.human_behaviour import random_throw_accuracy
 from pokemongo_bot import logger
 
 
@@ -37,47 +38,45 @@ class PokemonCatchWorker(object):
         return cp < self.config.cp and pokemon_potential < self.config.pokemon_potential
 
     def throw_pokeball(self, encounter_id, pokeball, spawnpoint_id, cp, pokemon_potential, pokemon_name):
+                
         id_list_before_catching = self.get_pokemon_ids()
+        
         self.api.catch_pokemon(
             encounter_id=encounter_id,
             pokeball=pokeball,
-            normalized_reticle_size=1.950 - random.random() / 200,
+            normalized_reticle_size=random_throw_accuracy(self.config.randomize_throw_accuracy),
             spawn_point_guid=spawnpoint_id,
             hit_pokemon=1,
-            spin_modifier=1,
+            spin_modifier=0,
             NormalizedHitPosition=1)
+        
         response_dict = self.api.call()
         pokemon_catch_response = response_dict.get('responses', {}).get('CATCH_POKEMON', {})
         status = pokemon_catch_response.get('status')
+        
         if status is None:
             return False
         elif status is 2:
-            logger.log(
-                '[-] Attempted to capture {} - failed.. trying again!'.format(
-                    pokemon_name), 'red')
+            logger.log('[-] Attempted to capture {} - failed.. trying again!'.format(
+                       pokemon_name), 'red')
             sleep(2)
             return True
         elif status is 3:
-            logger.log(
-                '[x] Oh no! {} vanished! :('.format(
-                    pokemon_name), 'red')
+            logger.log('[x] Oh no! {} vanished! :('.format(
+                       pokemon_name), 'red')
             return False
         elif status is 1:
             if self.should_transfer(cp, pokemon_potential):
-                logger.log(
-                    '[x] Captured {}! [CP {}] [IV {}] - exchanging for candy'.format(
-                        pokemon_name, cp,
-                        pokemon_potential), 'green')
+                logger.log('[x] Captured {}! [CP {}] [IV {}] - exchanging for candy'.format(
+                           pokemon_name, cp, pokemon_potential), 'green')
                 id_list_after_catching = self.get_pokemon_ids()
 
                 # Transfering Pokemon
                 pokemon_to_transfer = list(set(id_list_after_catching) - set(id_list_before_catching))
                 self.transfer_pokemon(pokemon_to_transfer[0])
-                logger.log(
-                    '[#] {} has been exchanged for candy!'.format(pokemon_name), 'green')
+                logger.log('[#] {} has been exchanged for candy!'.format(pokemon_name), 'green')
             else:
-                logger.log(
-                    '[x] Captured {}! [CP {}]'.format(pokemon_name, cp), 'green')
+                logger.log('[x] Captured {}! [CP {}]'.format(pokemon_name, cp), 'green')
             return False
         else:
             return False

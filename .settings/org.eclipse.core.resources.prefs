@@ -1,0 +1,7 @@
+eclipse.preferences.version=1
+encoding//pokemongo_bot/__init__.py=utf-8
+encoding//pokemongo_bot/cell_workers/__init__.py=utf-8
+encoding//pokemongo_bot/cell_workers/pokemon_catch_worker.py=utf-8
+encoding//pokemongo_bot/cell_workers/utils.py=utf-8
+encoding//pokemongo_bot/human_behaviour.py=utf-8
+encoding/pokecli.py=utf-8
